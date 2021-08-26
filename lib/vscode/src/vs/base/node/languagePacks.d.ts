@@ -5,9 +5,7 @@
 
 export interface NLSConfiguration {
 	locale: string;
-	availableLanguages: {
-		[key: string]: string;
-	};
+	availableLanguages: Record<string, string>;
 	pseudo?: boolean;
 	_languagePackSupport?: boolean;
 }

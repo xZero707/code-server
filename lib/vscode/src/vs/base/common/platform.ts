@@ -4,7 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 
 // eslint-disable-next-line code-import-patterns
-import { IServerWorkbenchConstructionOptions } from '../../workbench/workbench.web.api';
+import { IWorkbenchWebConfiguration } from '../../workbench/workbench.web.api';
+import { isInternalConfiguration } from './nls';
 
 const LANGUAGE_DEFAULT = 'en';
 
@@ -22,7 +23,7 @@ let _userAgent: string | undefined = undefined;
 
 interface NLSConfig {
 	locale: string;
-	availableLanguages: { [key: string]: string; };
+	availableLanguages: { [key: string]: string };
 	_translationsConfigFile: string;
 }
 
@@ -53,7 +54,7 @@ declare const process: INodeProcess;
 declare const global: unknown;
 declare const self: unknown;
 
-export const globals: any = (typeof self === 'object' ? self : typeof global === 'object' ? global : {});
+export const globals: any = typeof self === 'object' ? self : typeof global === 'object' ? global : {};
 
 let nodeProcess: INodeProcess | undefined = undefined;
 if (typeof globals.vscode !== 'undefined' && typeof globals.vscode.process !== 'undefined') {
@@ -67,7 +68,6 @@ if (typeof globals.vscode !== 'undefined' && typeof globals.vscode.process !== '
 const isElectronRenderer = typeof nodeProcess?.versions?.electron === 'string' && nodeProcess.type === 'renderer';
 export const isElectronSandboxed = isElectronRenderer && nodeProcess?.sandboxed;
 export const browserCodeLoadingCacheStrategy: 'none' | 'code' | 'bypassHeatCheck' | 'bypassHeatCheckAndEagerCompile' | undefined = (() => {
-
 	// Always enabled when sandbox is enabled
 	if (isElectronSandboxed) {
 		return 'bypassHeatCheck';
@@ -108,25 +108,30 @@ if (typeof navigator === 'object' && !isElectronRenderer) {
 	// NOTE@coder: Make languages work.
 	const el = typeof document !== 'undefined' && document.getElementById('vscode-workbench-web-configuration');
 	const rawWorkbenchConfig = el && el.getAttribute('data-settings');
+
 	if (rawWorkbenchConfig) {
 		try {
-			const workbenchConfig: IServerWorkbenchConstructionOptions = JSON.parse(rawWorkbenchConfig);
+			const workbenchConfig: IWorkbenchWebConfiguration = JSON.parse(rawWorkbenchConfig);
 			const nlsConfig = workbenchConfig.nlsConfiguration;
 
 			_locale = nlsConfig.locale;
-			// TODO@coder `_translationsConfigFile` appears to be unavailable.
-			// Is this deprecated?
-			// _translationsConfigFile = nlsConfig._translationsConfigFile;
+
+			if (isInternalConfiguration(nlsConfig)) {
+				_translationsConfigFile = nlsConfig._translationsConfigFile;
+			}
+
 			_language = nlsConfig.availableLanguages['*'] || LANGUAGE_DEFAULT;
-		} catch (error) { /* Oh well. */ }
+		} catch (error) {
+			/* Oh well. */
+		}
 	}
 }
 
 // Native environment
 else if (typeof nodeProcess === 'object') {
-	_isWindows = (nodeProcess.platform === 'win32');
-	_isMacintosh = (nodeProcess.platform === 'darwin');
-	_isLinux = (nodeProcess.platform === 'linux');
+	_isWindows = nodeProcess.platform === 'win32';
+	_isMacintosh = nodeProcess.platform === 'darwin';
+	_isLinux = nodeProcess.platform === 'linux';
 	_isLinuxSnap = _isLinux && !!nodeProcess.env['SNAP'] && !!nodeProcess.env['SNAP_REVISION'];
 	_locale = LANGUAGE_DEFAULT;
 	_language = LANGUAGE_DEFAULT;
@@ -139,8 +144,7 @@ else if (typeof nodeProcess === 'object') {
 			// VSCode's default language is 'en'
 			_language = resolved ? resolved : LANGUAGE_DEFAULT;
 			_translationsConfigFile = nlsConfig._translationsConfigFile;
-		} catch (e) {
-		}
+		} catch (e) {}
 	}
 	_isNative = true;
 }
@@ -154,14 +158,18 @@ export const enum Platform {
 	Web,
 	Mac,
 	Linux,
-	Windows
+	Windows,
 }
 export function PlatformToString(platform: Platform) {
 	switch (platform) {
-		case Platform.Web: return 'Web';
-		case Platform.Mac: return 'Mac';
-		case Platform.Linux: return 'Linux';
-		case Platform.Windows: return 'Windows';
+		case Platform.Web:
+			return 'Web';
+		case Platform.Mac:
+			return 'Mac';
+		case Platform.Linux:
+			return 'Linux';
+		case Platform.Windows:
+			return 'Windows';
 	}
 }
 
@@ -192,7 +200,6 @@ export const userAgent = _userAgent;
 export const language = _language;
 
 export namespace Language {
-
 	export function value(): string {
 		return language;
 	}
@@ -220,7 +227,7 @@ export namespace Language {
 export const locale = _locale;
 
 /**
- * The translatios that are available through language packs.
+ * The translation that are available through language packs.
  */
 export const translationsConfigFile = _translationsConfigFile;
 
@@ -255,7 +262,7 @@ export const setImmediate: ISetImmediate = (function defineSetImmediate() {
 			const myId = ++lastId;
 			pending.push({
 				id: myId,
-				callback: callback
+				callback: callback,
 			});
 			globals.postMessage({ vscodeSetImmediateId: myId }, '*');
 		};
@@ -270,9 +277,9 @@ export const setImmediate: ISetImmediate = (function defineSetImmediate() {
 export const enum OperatingSystem {
 	Windows = 1,
 	Macintosh = 2,
-	Linux = 3
+	Linux = 3,
 }
-export const OS = (_isMacintosh || _isIOS ? OperatingSystem.Macintosh : (_isWindows ? OperatingSystem.Windows : OperatingSystem.Linux));
+export const OS = _isMacintosh || _isIOS ? OperatingSystem.Macintosh : _isWindows ? OperatingSystem.Windows : OperatingSystem.Linux;
 
 let _isLittleEndian = true;
 let _isLittleEndianComputed = false;
@@ -283,7 +290,7 @@ export function isLittleEndian(): boolean {
 		test[0] = 1;
 		test[1] = 2;
 		const view = new Uint16Array(test.buffer);
-		_isLittleEndian = (view[0] === (2 << 8) + 1);
+		_isLittleEndian = view[0] === (2 << 8) + 1;
 	}
 	return _isLittleEndian;
 }

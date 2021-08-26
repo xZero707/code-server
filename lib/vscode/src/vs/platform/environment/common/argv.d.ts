@@ -6,7 +6,7 @@
 /**
  * A list of command line arguments we support natively.
  */
-export interface NativeParsedArgs {
+ export interface NativeParsedArgs {
 	_: string[];
 	'folder-uri'?: string[]; // undefined or array of 1 or more
 	'file-uri'?: string[]; // undefined or array of 1 or more
@@ -39,12 +39,12 @@ export interface NativeParsedArgs {
 	'extensions-dir'?: string;
 	'extensions-download-dir'?: string;
 	'builtin-extensions-dir'?: string;
-	/** @coder: BEGIN */
+	// @coder: BEGIN
 	'extra-extensions-dir'?: string[];
 	'extra-builtin-extensions-dir'?: string[];
-	'ignore-last-opened'?: string,
-	'server'?: string,
-	/** @coder: END */
+	'ignore-last-opened'?: boolean;
+	server?: string;
+	// @coder: END
 	extensionDevelopmentPath?: string[]; // undefined or array of 1 or more local paths or URIs
 	extensionTestsPath?: string; // either a local path or a URI
 	extensionDevelopmentKind?: string[];

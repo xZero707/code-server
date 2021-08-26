@@ -307,6 +307,25 @@ export function getMediaMime(path: string): string | undefined {
 	return mapExtToMediaMimes[ext.toLowerCase()];
 }
 
+interface MapExtToTextMimes {
+	[index: string]: string;
+}
+
+const mapExtToTextMimes: MapExtToTextMimes = {
+	'.html': 'text/html',
+	'.js': 'text/javascript',
+	'.json': 'application/json',
+	'.css': 'text/css',
+	'.svg': 'image/svg+xml',
+};
+
+export const PLAIN_TEXT_MIME_TYPE = 'text/plain';
+
+export function getTextMime(path: string): string | undefined {
+	const ext = extname(path);
+	return mapExtToTextMimes[ext.toLowerCase()];
+}
+
 export function getExtensionForMimeType(mimeType: string): string | undefined {
 	for (const extension in mapExtToMediaMimes) {
 		if (mapExtToMediaMimes[extension] === mimeType) {

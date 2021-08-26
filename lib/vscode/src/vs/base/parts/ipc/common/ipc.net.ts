@@ -28,6 +28,7 @@ function getEmptyBuffer(): VSBuffer {
 }
 
 export class ChunkStream {
+
 	private _chunks: VSBuffer[];
 	private _totalLength: number;
 
@@ -54,6 +55,7 @@ export class ChunkStream {
 	}
 
 	private _read(byteCount: number, advance: boolean): VSBuffer {
+
 		if (byteCount === 0) {
 			return getEmptyBuffer();
 		}
@@ -125,21 +127,8 @@ const enum ProtocolMessageType {
 	Ack = 3,
 	KeepAlive = 4,
 	Disconnect = 5,
-	ReplayRequest = 6,
+	ReplayRequest = 6
 }
-
-/**
- * @coder Added for use in debugging protocol responses.
- */
-const ProtocolMessageTypeToLabel: { [K in ProtocolMessageType]: string } = {
-	0: 'None',
-	1: 'Regular',
-	2: 'Control',
-	3: 'Ack',
-	4: 'KeepAlive',
-	5: 'Disconnect',
-	6: 'ReplayRequest',
-};
 
 export const enum ProtocolConstants {
 	HeaderLength = 13,
@@ -170,25 +159,25 @@ export const enum ProtocolConstants {
 }
 
 class ProtocolMessage {
+
 	public writtenTime: number;
 
-	constructor(public readonly type: ProtocolMessageType, public readonly id: number, public readonly ack: number, public readonly data: VSBuffer) {
+	constructor(
+		public readonly type: ProtocolMessageType,
+		public readonly id: number,
+		public readonly ack: number,
+		public readonly data: VSBuffer
+	) {
 		this.writtenTime = 0;
 	}
 
 	public get size(): number {
 		return this.data.byteLength;
 	}
-
-	/**
-	 * @coder Added for use in debugging protocol responses.
-	 */
-	public get label(): string {
-		return ProtocolMessageTypeToLabel[this.type as ProtocolMessageType] || 'Unknown';
-	}
 }
 
 class ProtocolReader extends Disposable {
+
 	private readonly _socket: ISocket;
 	private _isDisposed: boolean;
 	private readonly _incomingData: ChunkStream;
@@ -202,7 +191,7 @@ class ProtocolReader extends Disposable {
 		readLen: ProtocolConstants.HeaderLength,
 		messageType: ProtocolMessageType.None,
 		id: 0,
-		ack: 0,
+		ack: 0
 	};
 
 	constructor(socket: ISocket) {
@@ -224,6 +213,7 @@ class ProtocolReader extends Disposable {
 		this._incomingData.acceptChunk(data);
 
 		while (this._incomingData.byteLength >= this._state.readLen) {
+
 			const buff = this._incomingData.read(this._state.readLen);
 
 			if (this._state.readHead) {
@@ -269,6 +259,7 @@ class ProtocolReader extends Disposable {
 }
 
 class ProtocolWriter {
+
 	private _isDisposed: boolean;
 	private readonly _socket: ISocket;
 	private _data: VSBuffer[];
@@ -366,6 +357,7 @@ class ProtocolWriter {
  * Only Regular messages are counted, other messages are not counted, nor acknowledged.
  */
 export class Protocol extends Disposable implements IMessagePassingProtocol {
+
 	private _socket: ISocket;
 	private _socketWriter: ProtocolWriter;
 	private _socketReader: ProtocolReader;
@@ -382,13 +374,11 @@ export class Protocol extends Disposable implements IMessagePassingProtocol {
 		this._socketWriter = this._register(new ProtocolWriter(this._socket));
 		this._socketReader = this._register(new ProtocolReader(this._socket));
 
-		this._register(
-			this._socketReader.onMessage(msg => {
-				if (msg.type === ProtocolMessageType.Regular) {
-					this._onMessage.fire(msg.data);
-				}
-			}),
-		);
+		this._register(this._socketReader.onMessage((msg) => {
+			if (msg.type === ProtocolMessageType.Regular) {
+				this._onMessage.fire(msg.data);
+			}
+		}));
 
 		this._register(this._socket.onClose(() => this._onDidDispose.fire()));
 	}
@@ -411,13 +401,12 @@ export class Protocol extends Disposable implements IMessagePassingProtocol {
 }
 
 export class Client<TContext = string> extends IPCClient<TContext> {
+
 	static fromSocket<TContext = string>(socket: ISocket, id: TContext): Client<TContext> {
 		return new Client(new Protocol(socket), id);
 	}
 
-	get onDidDispose(): Event<void> {
-		return this.protocol.onDidDispose;
-	}
+	get onDidDispose(): Event<void> { return this.protocol.onDidDispose; }
 
 	constructor(private protocol: Protocol | PersistentProtocol, id: TContext, ipcLogger: IIPCLogger | null = null) {
 		super(protocol, id, ipcLogger);
@@ -454,7 +443,7 @@ export class BufferedEmitter<T> {
 			},
 			onLastListenerRemove: () => {
 				this._hasListeners = false;
-			},
+			}
 		});
 
 		this.event = this._emitter.event;
@@ -499,6 +488,7 @@ class QueueElement<T> {
 }
 
 class Queue<T> {
+
 	private _first: QueueElement<T> | null;
 	private _last: QueueElement<T> | null;
 
@@ -515,8 +505,7 @@ class Queue<T> {
 	}
 
 	public toArray(): T[] {
-		let result: T[] = [],
-			resultLen = 0;
+		let result: T[] = [], resultLen = 0;
 		let it = this._first;
 		while (it) {
 			result[resultLen++] = it.data;
@@ -550,6 +539,7 @@ class Queue<T> {
 }
 
 class LoadEstimator {
+
 	private static _HISTORY_LENGTH = 10;
 	private static _INSTANCE: LoadEstimator | null = null;
 	public static getInstance(): LoadEstimator {
@@ -600,6 +590,7 @@ class LoadEstimator {
  * Moreover, it will ensure no messages are lost if there are no event listeners.
  */
 export class PersistentProtocol implements IMessagePassingProtocol {
+
 	private _isReconnecting: boolean;
 
 	private _outgoingUnackMsg: Queue<ProtocolMessage>;

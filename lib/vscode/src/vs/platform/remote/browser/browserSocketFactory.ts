@@ -27,6 +27,7 @@ export interface IWebSocket {
 }
 
 class BrowserWebSocket extends Disposable implements IWebSocket {
+
 	private readonly _onData = new Emitter<ArrayBuffer>();
 	public readonly onData = this._onData.event;
 
@@ -113,31 +114,29 @@ class BrowserWebSocket extends Disposable implements IWebSocket {
 			sendPendingErrorNow();
 		};
 
-		this._register(
-			dom.addDisposableListener(this._socket, 'close', (e: CloseEvent) => {
-				this._isClosed = true;
+		this._register(dom.addDisposableListener(this._socket, 'close', (e: CloseEvent) => {
+			this._isClosed = true;
 
-				if (pendingErrorEvent) {
-					if (!window.navigator.onLine) {
-						// The browser is offline => this is a temporary error which might resolve itself
-						sendErrorNow(new RemoteAuthorityResolverError('Browser is offline', RemoteAuthorityResolverErrorCode.TemporarilyNotAvailable, e));
+			if (pendingErrorEvent) {
+				if (!window.navigator.onLine) {
+					// The browser is offline => this is a temporary error which might resolve itself
+					sendErrorNow(new RemoteAuthorityResolverError('Browser is offline', RemoteAuthorityResolverErrorCode.TemporarilyNotAvailable, e));
+				} else {
+					// An error event is pending
+					// The browser appears to be online...
+					if (!e.wasClean) {
+						// Let's be optimistic and hope that perhaps the server could not be reached or something
+						sendErrorNow(new RemoteAuthorityResolverError(e.reason || `WebSocket close with status code ${e.code}`, RemoteAuthorityResolverErrorCode.TemporarilyNotAvailable, e));
 					} else {
-						// An error event is pending
-						// The browser appears to be online...
-						if (!e.wasClean) {
-							// Let's be optimistic and hope that perhaps the server could not be reached or something
-							sendErrorNow(new RemoteAuthorityResolverError(e.reason || `WebSocket close with status code ${e.code}`, RemoteAuthorityResolverErrorCode.TemporarilyNotAvailable, e));
-						} else {
-							// this was a clean close => send existing error
-							errorRunner.cancel();
-							sendPendingErrorNow();
-						}
+						// this was a clean close => send existing error
+						errorRunner.cancel();
+						sendPendingErrorNow();
 					}
 				}
+			}
 
-				this._onClose.fire();
-			})
-		);
+			this._onClose.fire();
+		}));
 
 		this._register(dom.addDisposableListener(this._socket, 'error', sendErrorSoon));
 	}
@@ -158,11 +157,11 @@ class BrowserWebSocket extends Disposable implements IWebSocket {
 	}
 }
 
-export const defaultWebSocketFactory = new (class implements IWebSocketFactory {
+export const defaultWebSocketFactory = new class implements IWebSocketFactory {
 	create(url: string): IWebSocket {
 		return new BrowserWebSocket(new WebSocket(url));
 	}
-})();
+};
 
 class BrowserSocket implements ISocket {
 	public readonly socket: IWebSocket;
@@ -200,6 +199,7 @@ class BrowserSocket implements ISocket {
 	}
 }
 
+
 export class BrowserSocketFactory implements ISocketFactory {
 	private readonly _webSocketFactory: IWebSocketFactory;
 
@@ -208,7 +208,7 @@ export class BrowserSocketFactory implements ISocketFactory {
 	}
 
 	connect(host: string, port: number, query: string, callback: IConnectCallback): void {
-		/** @coder Modified to work against the current path. */
+		/** @coder Modified to work against the current path.  */
 		const socket = this._webSocketFactory.create(`${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}${window.location.pathname}?${query}&skipWebSocketFrames=false`);
 		const errorListener = socket.onError((err) => callback(err, undefined));
 		socket.onOpen(() => {
@@ -217,3 +217,6 @@ export class BrowserSocketFactory implements ISocketFactory {
 		});
 	}
 }
+
+
+
