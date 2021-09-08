@@ -1,4 +1,4 @@
 [submodule "vscode"]
 	path = lib/vscode
 	url = https://github.com/cdr/vscode.git
-	branch = 1.57.1-initial
+	branch = 1.60.0-code-server-patch
