@@ -88,6 +88,7 @@ symlink_asar() {
 
 vscode_yarn() {
   cd lib/vscode
+
   yarn --production --frozen-lockfile
 
   symlink_asar

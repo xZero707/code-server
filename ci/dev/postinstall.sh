@@ -3,6 +3,8 @@ set -euo pipefail
 
 main() {
   cd "$(dirname "$0")/../.."
+  git submodule update --init
+
   source ./ci/lib.sh
 
   # This installs the dependencies needed for testing

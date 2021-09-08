@@ -7,6 +7,7 @@ export npm_config_build_from_source=true
 
 main() {
   cd "$(dirname "${0}")/../.."
+
   source ./ci/lib.sh
 
   rsync "$RELEASE_PATH/" "$RELEASE_PATH-standalone"

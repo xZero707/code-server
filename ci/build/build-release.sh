@@ -12,6 +12,8 @@ KEEP_MODULES="${KEEP_MODULES-0}"
 
 main() {
   cd "$(dirname "${0}")/../.."
+  git submodule update --init
+
   source ./ci/lib.sh
 
   VSCODE_SRC_PATH="lib/vscode"

@@ -8,6 +8,7 @@ MINIFY=${MINIFY-true}
 
 main() {
   cd "$(dirname "${0}")/../.."
+
   cd lib/vscode
 
   yarn gulp compile-build compile-extensions-build compile-extension-media
