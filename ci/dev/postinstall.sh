@@ -3,7 +3,12 @@ set -euo pipefail
 
 main() {
   cd "$(dirname "$0")/../.."
-  git submodule update --init
+
+  if [ -z "$(ls -A lib/vscode)" ]; then
+    git submodule init
+  else
+    git submodule update
+  fi
 
   source ./ci/lib.sh
 
