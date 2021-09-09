@@ -77,20 +77,13 @@ yarn watch
 
 ### Updates to VS Code
 
-Updating VS Code requires `git subtree`. On some RPM-based Linux distros, `git subtree` is not included by default and needs to be installed separately. To
-install, run `dnf install git-subtree` or `yum install git-subtree`.
-
 To update VS Code:
 
-1. Run `yarn update:vscode`.
-2. Enter a version (e.g., `1.53`)
-3. This will open a draft pull request for you.
-4. There will be merge conflicts. Commit them first, since it will be impossible
-   for us to review your PR if you don't.
-5. Fix the conflicts. Then, test code-server locally to make sure everything
-   works.
-6. Check the Node.js version that's used by Electron (which is shipped with VS
+1. Run `git submodule update --remote`.
+   Then, test code-server locally to make sure everything works.
+2. Check the Node.js version that's used by Electron (which is shipped with VS
    Code. If necessary, update your version of Node.js to match.
+3. Open a PR
 
 > Watch for updates to
 > `lib/vscode/src/vs/code/browser/workbench/workbench.html`. You may need to
