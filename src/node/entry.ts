@@ -49,7 +49,7 @@ async function entry(): Promise<void> {
       console.log({
         codeServer: version,
         commit,
-        vscode: require("../../lib/vscode/package.json").version,
+        vscode: require("../../node_modules/vscode/package.json").version,
       })
     } else {
       console.log(version, commit)

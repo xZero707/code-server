@@ -4,21 +4,19 @@ set -euo pipefail
 main() {
   cd "$(dirname "$0")/../.."
 
-  if [ -z "$(ls -A lib/vscode)" ]; then
-    git submodule init
-  else
-    git submodule update
-  fi
-
   source ./ci/lib.sh
 
-  # This installs the dependencies needed for testing
+  echo 'Installing code-server test dependencies...'
+
   cd test
-  yarn
+  yarn install
   cd ..
 
-  cd lib/vscode
-  yarn ${CI+--frozen-lockfile}
+  echo 'Installing VS Code dependencies...'
+
+  cd node_modules/vscode
+  # Freeze when in CI
+  yarn install --frozen-lockfile
 
   symlink_asar
 }

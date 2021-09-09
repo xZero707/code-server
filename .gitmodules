@@ -1,5 +1,0 @@
-[submodule "vscode"]
-	path = lib/vscode
-	url = ../vscode.git
-	branch = code-server
-        shallow = true

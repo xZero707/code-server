@@ -25,7 +25,7 @@ main() {
     exit 1
   fi
 
-  if [[ ! -d $dir/lib/vscode/out ]]; then
+  if [[ ! -d $dir/node_modules/vscode/out ]]; then
     echo >&2 "No VS Code build detected"
     echo >&2 "You can build it with 'yarn build:vscode' or 'yarn watch'"
     exit 1

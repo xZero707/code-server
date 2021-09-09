@@ -7,7 +7,7 @@ main() {
 
   git clean -Xffd
 
-  pushd lib/vscode
+  pushd node_modules/vscode
   git clean -xffd
   popd
 }

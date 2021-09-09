@@ -12,12 +12,11 @@ KEEP_MODULES="${KEEP_MODULES-0}"
 
 main() {
   cd "$(dirname "${0}")/../.."
-  git submodule update --init
 
   source ./ci/lib.sh
 
-  VSCODE_SRC_PATH="lib/vscode"
-  VSCODE_OUT_PATH="$RELEASE_PATH/lib/vscode"
+  VSCODE_SRC_PATH="node_modules/vscode"
+  VSCODE_OUT_PATH="$RELEASE_PATH/node_modules/vscode"
 
   mkdir -p "$RELEASE_PATH"
 
@@ -26,7 +25,7 @@ main() {
 
   rsync ./docs/README.md "$RELEASE_PATH"
   rsync LICENSE.txt "$RELEASE_PATH"
-  rsync ./lib/vscode/ThirdPartyNotices.txt "$RELEASE_PATH"
+  rsync ./node_modules/vscode/ThirdPartyNotices.txt "$RELEASE_PATH"
 }
 
 bundle_code_server() {

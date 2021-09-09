@@ -87,7 +87,7 @@ symlink_asar() {
 }
 
 vscode_yarn() {
-  cd lib/vscode
+  cd node_modules
 
   yarn --production --frozen-lockfile
 
