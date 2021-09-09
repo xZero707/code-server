@@ -76,22 +76,10 @@ main() {
   fi
 }
 
-# This is a copy of symlink_asar in ../lib.sh. Look there for details.
-symlink_asar() {
-  rm -rf node_modules.asar
-  if [ "${WINDIR-}" ]; then
-    mklink /J node_modules.asar node_modules
-  else
-    ln -s node_modules node_modules.asar
-  fi
-}
-
 vscode_yarn() {
   cd node_modules
 
   yarn --production --frozen-lockfile
-
-  symlink_asar
 
   cd extensions
   yarn --production --frozen-lockfile

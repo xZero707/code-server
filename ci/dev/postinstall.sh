@@ -17,8 +17,6 @@ main() {
   cd node_modules/vscode
   # Freeze when in CI
   yarn install --frozen-lockfile
-
-  symlink_asar
 }
 
 main "$@"
